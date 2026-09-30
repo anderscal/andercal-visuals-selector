@@ -66,7 +66,97 @@
      - fix: corrección de errores
      - docs: cambios en documentación
 
+7. REPOSITORIO REMOTO Y VINCULACIÓN CON GITHUB:
+   • remote origin:
+     'origin' es el alias por defecto que le da Git a la URL remota de tu repositorio en GitHub.
+   • git remote add origin <URL>:
+     Conecta el proyecto local de tu máquina con el repositorio en la nube en GitHub.
+   • git remote -v:
+     Verifica a qué direcciones web apunta tu repositorio (fetch/push).
+   • git push -u origin main:
+     - 'push': sube las versiones guardadas (commits) hacia GitHub.
+     - '-u' (upstream): establece un vínculo permanente entre tu rama local 'main' y 'origin/main', para que en el futuro solo tengas que escribir 'git push'.
+   • ESTADO DE FASE 0:
+     ✔ Completada exitosamente. Repositorio publicado en GitHub:
+       https://github.com/anderscal/andercal-visuals-selector.git
+
 ======================================================================
+[FASE 1] MOTOR CENTRAL DE ARCHIVOS (CORE LOGIC)
+======================================================================
+
+1. EXPRESIONES REGULARES (REGEX) EN PYTHON:
+   • ¿Qué es RegEx?
+     Un lenguaje de patrones para buscar, extraer o validar combinaciones específicas de caracteres dentro de un texto.
+   • El módulo 're' de Python:
+     - re.findall(pattern, string): Encuentra todas las coincidencias del patrón en el texto.
+   • Patrón de extracción de códigos de 4 dígitos:
+     - (?<!\d)\d{4}(?!\d)
+     - '\d{4}': busca exactamente 4 dígitos seguidos (0000 al 9999).
+     - Lookarounds (?<!\d) y (?!\d): asegura que no extraiga 4 dígitos de un número de 5 dígitos (ej. no extrae 7644 de 17644).
+
+   • Caso Borde Detectado (Fechas vs Códigos):
+     - Problema: En tablas de Excel con fechas (ej. '9/28/2026'), el año '2026' era interpretado como un código fotográfico falso.
+     - Solución: Aplicar una fase previa de desinfección mediante la RegEx '\b\d{1,4}[/.-]\d{1,2}[/.-]\d{1,4}\b' para eliminar fechas completas antes de buscar los códigos.
+
+2. MANEJO DE RUTAS CON PATHLIB Y SIDECARS XMP:
+   • pathlib.Path (Librería estándar de Python):
+     - Sustituye a os.path por una manipulación orientada a objetos de rutas del sistema operativo.
+     - .is_dir(), .is_file(), .iterdir(), .name
+     - .lower(): permite búsquedas insensibles a mayúsculas/minúsculas (.CR3 vs .cr3).
+   • Convención de Sidecars XMP:
+     - XMP Simple: _MG_8009.xmp
+     - XMP Doble: _MG_8009.CR3.xmp
+     - Solución en scanner.py: Validar mediante name.lower().endswith(ext_lower), garantizando la captura de ambas convenciones.
+
+3. VALIDADOR DE DIAGNÓSTICO E INTEGRIDAD DE DATOS (validator.py):
+   • Principio de Seguridad Primero (Fail-Safe):
+     - La aplicación no debe arriesgarse a mover/copiar parcialmente una selección si falta algún archivo o si hay colisiones.
+   • Reporte de Diagnóstico Estructurado:
+     - unique_codes: códigos extraídos sin duplicados.
+     - found_counts / missing_counts: resumen numérico por formato.
+     - missing_details: diccionario con la ubicación exacta de los archivos faltantes por código y extensión.
+     - ambiguous_details: detección de colisiones de nombres (ej. Canon vs Nikon en la misma carpeta).
+     - files_to_process: lista definitiva de objetos Path validados para ser operados.
+     - is_valid_for_operation: bandera booleana global que bloquea o habilita la acción final.
+
+4. GESTOR DE OPERACIONES DE ARCHIVOS Y NOMBRES ÚNICOS (mover.py):
+   • shutil.copy2 vs shutil.move:
+     - shutil.copy2: Copia los datos y conserva metadatos originales de fechas (Creación y Modificación).
+     - shutil.move: Traslada el archivo en el sistema de archivos.
+   • Validación de existencia de carpetas:
+     - mkdir(parents=True, exist_ok=True): Garantiza la existencia de /Seleccionadas sin fallar si ya existía previamente.
+   • Función get_unique_destination_path:
+     - Si 'foto.CR3' ya existe en /Seleccionadas, asigna automáticamente 'foto_1.CR3', 'foto_2.CR3', etc.
+     - Garantiza cero pérdidas de información o sobrescrituras involuntarias.
+
+======================================================================
+[FASE 2] PRUEBAS AUTOMATIZADAS DE INTEGRACIÓN (PYTEST)
+======================================================================
+
+1. SUITE UNIFICADA DE PRUEBAS CON PYTEST:
+   • ¿Qué es pytest?
+     El framework estándar en la industria de Python para ejecutar pruebas unitarias y de integración.
+   • Instalación de dependencias externas (pip vs python -m pip):
+     - En Windows, si 'pip' no está directo en el PATH global, se invoca a través del intérprete ejecutable:
+       python -m pip install -r requirements.txt
+     - Ventaja de 'python -m pip': Garantiza que los paquetes se instalen exactamente en el Python activo en la terminal.
+   • Descubrimiento automático (Test Discovery):
+     pytest detecta automáticamente cualquier archivo que comience por 'test_*.py' y ejecute sus funciones 'test_*()'.
+   • Comando de ejecución:
+     python -m pytest -v (modo 'verbose': muestra el detalle de cada prueba pasada o fallida).
+   • Pruebas End-to-End (E2E):
+     Validan la tubería completa (Parser -> Scanner -> Validator -> Mover) en directorios temporales aislados (tempfile).
+
+======================================================================
+
+
+
+
+
+
+
+
+
 
 
 
