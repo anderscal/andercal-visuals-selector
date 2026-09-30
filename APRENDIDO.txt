@@ -148,6 +148,41 @@
      Validan la tubería completa (Parser -> Scanner -> Validator -> Mover) en directorios temporales aislados (tempfile).
 
 ======================================================================
+[FASE 3] PERSISTENCIA LOCAL Y CONFIGURACIÓN (JSON)
+======================================================================
+
+1. GESTOR DE PREFERENCIAS Y FORMATOS (settings_manager.py):
+   • Objeto json en Python:
+     - json.load(f): Lee y convierte texto JSON a un diccionario o lista nativa de Python.
+     - json.dump(obj, f, indent=2, ensure_ascii=False): Escribe un diccionario de Python como un archivo JSON formateado y legible.
+   • Estrategia de Carga Segura (Fallbacks / Resiliencia):
+     - Si 'settings.json' o 'formats.json' no existen o están dañados, el sistema no colapsa: carga los valores por defecto (DEFAULT_SETTINGS) y regenera los archivos automáticamente.
+   • Extensibilidad por el usuario:
+     - La función add_custom_format() permite agregar nuevos formatos (ej: 'PSD', 'TIFF') dinámicamente sin modificar el código fuente.
+
+======================================================================
+[FASE 4] INTERFAZ GRÁFICA MODERNA (CUSTOMTKINTER)
+======================================================================
+
+1. ARQUITECTURA DE LA APLICACIÓN DE ESCRITORIO (src/gui/ & src/app.py):
+   • CustomTkinter vs Tkinter Clásico:
+     - CustomTkinter proporciona componentes visuales modernos con bordes redondeados, escalado DPI, tema oscuro ('Dark') y paleta de colores personalizada.
+   • Componentes principales:
+     - CTkEntry y filedialog.askdirectory(): Explorador de archivos nativo de Windows.
+     - CTkTextbox: Caja de texto de entrada para pegar listados de Excel o texto.
+     - CTkCheckBox dinámicos y Botón '➕ Agregar extensión':
+       Permite al usuario añadir nuevos formatos personalizados (ej: PSD, TIFF, PNG) en tiempo real, registrándolos en formats.json y agregando el checkbox dinámicamente.
+     - Modal PreviewDialog (CTkToplevel): Ventana emergente que bloquea la ventana principal (.grab_set()) exigiendo confirmación explícita con lista detallada antes de mover/copiar.
+   • Bucle de Eventos (.mainloop()):
+     - Ciclo continuo en src/app.py que escucha los clics, entradas de texto y redibujado de la interfaz.
+
+   • Centrado Dinámico de Ventanas:
+     - Cálculo de dimensiones de pantalla mediante winfo_screenwidth() y winfo_screenheight() para posicionar la ventana perfectamente centrada (+x+y) en monitores de cualquier resolución.
+
+======================================================================
+
+
+
 
 
 
