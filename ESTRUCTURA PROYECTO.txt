@@ -1,0 +1,1382 @@
+Sí. Y en tu caso yo lo plantearía como un pequeño software de escritorio propio, no como un simple script convertido a .exe.
+El nombre sería:
+andercal.visuals — Selector
+La idea es que puedas usarlo durante años y que después podamos añadir funciones sin tener que reconstruirlo.
+1. Tecnología que recomiendo
+Para tu caso elegiría:
+Python + Tkinter/ttk + PyInstaller
+Python
+Será el lenguaje que manejará toda la lógica:
+•	Leer la carpeta.
+•	Detectar archivos.
+•	Extraer números.
+•	Identificar RAW.
+•	Identificar XMP.
+•	Comparar selección contra archivos existentes.
+•	Mover/copiar archivos.
+•	Crear carpetas.
+•	Generar registros.
+•	Manejar errores.
+Tkinter
+Será la interfaz gráfica.
+Por ejemplo:
+┌──────────────────────────────────────────────────────┐
+│                                                      │
+│       andercal.visuals — SELECTOR                   │
+│                                                      │
+├──────────────────────────────────────────────────────┤
+│                                                      │
+│  CARPETA DE ORIGEN                                   │
+│  ┌──────────────────────────────────────────────┐    │
+│  │ C:\...\LA FIESTA DE JUANA                   │    │
+│  └──────────────────────────────────────────────┘    │
+│                              [ Seleccionar carpeta ]  │
+│                                                      │
+│  FOTOS SELECCIONADAS                                 │
+│  ┌──────────────────────────────────────────────┐    │
+│  │ _MG_7644.jpg                                │    │
+│  │ _MG_7647.jpg                                │    │
+│  │ _MG_7654.jpg                                │    │
+│  │ _MG_7664.jpg                                │    │
+│  │ ...                                          │    │
+│  └──────────────────────────────────────────────┘    │
+│                                                      │
+│  [ VERIFICAR ]                         [ LIMPIAR ]   │
+│                                                      │
+├──────────────────────────────────────────────────────┤
+│  RESULTADO                                           │
+│                                                      │
+│  ✓ RAW encontrados       69                          │
+│  ✓ XMP encontrados       69                          │
+│  ⚠ RAW faltantes          0                          │
+│  ⚠ XMP faltantes          0                          │
+│                                                      │
+│                    [ MOVER FOTOS ]                   │
+└──────────────────────────────────────────────────────┘
+Tkinter es parte de la distribución estándar de Python y está disponible en Windows, por lo que es una opción bastante sencilla para empezar. Python documentation
+PyInstaller
+Finalmente convertiríamos nuestro programa Python en:
+andercal.visuals - Selector.exe
+PyInstaller puede empaquetar Python y sus dependencias para que el usuario final pueda ejecutar la aplicación sin tener Python instalado. Para generar un .exe de Windows, el proceso de construcción se realiza en Windows. PyInstaller
+________________________________________
+2. ¿Hay que pagar algo?
+No.
+Para desarrollar la primera versión podemos hacerlo completamente con herramientas gratuitas:
+Herramienta	Uso	Costo
+Python	Programación	$0
+Tkinter	Interfaz	$0
+PyInstaller	Crear .exe	$0
+Visual Studio Code	Desarrollo	$0
+Git	Control de versiones	$0
+GitHub	Guardar proyecto	$0
+Windows	Ejecución/desarrollo	Ya lo tienes
+No necesitas comprar una licencia de programación.
+Tampoco necesitamos Adobe, Photoshop ni Lightroom para que el programa funcione.
+El programa solamente trabaja con los archivos que ya existen en tu disco.
+________________________________________
+3. Lo más importante: no vamos a programarlo pensando solamente en CR3
+Aquí quiero hacer una modificación importante respecto a los scripts que hemos utilizado.
+El programa debe tener un sistema de detección de archivos RAW configurable.
+Por ejemplo:
+RAW_EXTENSIONS = {
+    ".cr3",
+    ".cr2",
+    ".nef",
+    ".arw",
+    ".raf",
+    ".dng",
+    ".orf",
+    ".rw2",
+    ".pef",
+    ".srw",
+    ".raw"
+}
+Así mañana puedes tener:
+_MG_8009.CR3
+_MG_8010.CR2
+_DSC_8011.ARW
+_DSC_8012.NEF
+_IMG_8013.DNG
+y el programa los entiende.
+No importa qué cámara hayas utilizado.
+________________________________________
+4. Pero tampoco quiero que el programa dependa del nombre completo
+Este será uno de los componentes centrales.
+Si pegas:
+_MG_8009.jpg
+el programa debe obtener:
+8009
+Si pegas:
+_MG_8009.CR3
+obtiene:
+8009
+Si pegas:
+IMG_8009.NEF
+obtiene:
+8009
+Incluso:
+8009
+obtiene:
+8009
+Y una lista como esta:
+_MG_8009.jpg
+_MG_8019.jpg
+_MG_8023.jpg
+_MG_8032.jpg
+se convierte internamente en:
+8009
+8019
+8023
+8032
+Esto significa que no tendrás que limpiar tus listas antes de pegarlas.
+________________________________________
+5. Y quiero hacerlo todavía más flexible
+Podemos hacer que acepte directamente algo como lo que me mostraste anteriormente:
+_MG_7644.jpg    Destacados    9/28/2026
+_MG_7647.jpg    Destacados    9/28/2026
+_MG_7654.jpg    Destacados    9/28/2026
+El programa analizará el texto y buscará patrones de cuatro dígitos.
+Resultado:
+7644
+7647
+7654
+Ignora:
+Destacados
+9/28/2026
+Esto es muy conveniente porque puedes copiar directamente desde Excel, una página web, una tabla o tu sistema de selección.
+________________________________________
+6. El XMP merece un tratamiento especial
+Aquí quiero que hagamos el programa más robusto que nuestros scripts anteriores.
+Supongamos que tenemos:
+_MG_8009.CR3
+El programa buscará diferentes posibilidades de sidecar:
+_MG_8009.xmp
+y:
+_MG_8009.CR3.xmp
+No asumiremos una sola convención.
+También podremos hacer que la aplicación muestre:
+8009
+
+RAW
+✓ _MG_8009.CR3
+
+XMP
+✓ _MG_8009.xmp
+o:
+8019
+
+RAW
+✓ _MG_8019.CR3
+
+XMP
+⚠ NO ENCONTRADO
+Esto es importante porque no quiero que la aplicación mueva una foto pensando que todo está completo cuando el XMP no existe.
+________________________________________
+7. El flujo principal
+La aplicación debería funcionar así:
+PASO 1
+Seleccionas:
+CARPETA DE ORIGEN
+Por ejemplo:
+C:\Users\User\Documents\@andercal.visual\FOTOGRAFIA\LA FIESTA DE JUANA
+________________________________________
+PASO 2
+Pegas:
+_MG_7644.jpg
+_MG_7647.jpg
+_MG_7654.jpg
+...
+_MG_8109.jpg
+________________________________________
+PASO 3
+Presionas:
+VERIFICAR
+El programa analiza.
+________________________________________
+PASO 4
+Presenta algo así:
+VERIFICACIÓN
+
+Selecciones recibidas             69
+Números únicos                    69
+
+RAW
+Encontrados                       69
+Faltantes                          0
+
+XMP
+Encontrados                       67
+Faltantes                          2
+Y abajo:
+XMP FALTANTES
+
+7805
+7995
+________________________________________
+PASO 5
+Mientras exista cualquier problema:
+MOVER FOTOS
+queda deshabilitado.
+Esto es fundamental.
+________________________________________
+PASO 6
+Cuando todo esté correcto:
+✓ 69 RAW encontrados
+✓ 69 XMP encontrados
+
+TODO LISTO
+Entonces:
+[ MOVER FOTOS ]
+________________________________________
+8. ¿Qué significa "mover"?
+El programa creará automáticamente:
+LA FIESTA DE JUANA
+│
+├── RAW...
+├── ...
+└── Seleccionadas
+y dentro:
+Seleccionadas
+│
+├── _MG_7644.CR3
+├── _MG_7644.xmp
+├── _MG_7647.CR3
+├── _MG_7647.xmp
+├── _MG_7654.CR3
+├── _MG_7654.xmp
+└── ...
+________________________________________
+9. Pero agregaría una opción que puede salvarte de errores
+En lugar de solamente:
+MOVER
+tendríamos:
+Acción:
+
+○ Copiar
+● Mover
+Copiar
+Deja los originales donde están y crea una copia en Seleccionadas.
+Mover
+Hace lo que actualmente hacemos con PowerShell.
+Para tus primeras pruebas utilizaríamos COPIAR.
+Cuando comprobemos que todo funciona perfectamente, utilizarías MOVER.
+________________________________________
+10. También quiero un botón "Vista previa"
+Antes de ejecutar:
+[ VISTA PREVIA ]
+y mostrar:
+SE VAN A PROCESAR 69 FOTOS
+
+RAW:
+69
+
+XMP:
+69
+
+Destino:
+
+...\LA FIESTA DE JUANA\Seleccionadas
+
+Archivos que serán movidos:
+
+_MG_7644.CR3
+_MG_7644.xmp
+_MG_7647.CR3
+_MG_7647.xmp
+...
+
+                    [ CANCELAR ] [ CONFIRMAR ]
+Así reduces muchísimo la posibilidad de equivocarte.
+________________________________________
+11. Estructura técnica del proyecto
+No quiero que hagamos un único archivo de 2.000 líneas.
+Lo organizaría así:
+andercal-selector/
+│
+├── app.py
+│
+├── core/
+│   ├── parser.py
+│   ├── scanner.py
+│   ├── matcher.py
+│   ├── mover.py
+│   └── validator.py
+│
+├── gui/
+│   ├── main_window.py
+│   ├── results_view.py
+│   └── dialogs.py
+│
+├── config/
+│   └── settings.json
+│
+├── assets/
+│   └── icon.ico
+│
+├── tests/
+│   ├── test_parser.py
+│   ├── test_scanner.py
+│   └── test_matcher.py
+│
+└── build/
+Esto parece más complejo inicialmente, pero tiene una ventaja enorme:
+podemos modificar la interfaz sin tocar el motor de archivos.
+________________________________________
+12. Arquitectura que propongo
+La aplicación tendría cuatro capas:
+                    USUARIO
+                       │
+                       ▼
+              ┌─────────────────┐
+              │      GUI        │
+              │   Interfaz      │
+              └────────┬────────┘
+                       │
+                       ▼
+              ┌─────────────────┐
+              │  PROCESAMIENTO  │
+              │                 │
+              │ extraer números │
+              │ detectar RAW    │
+              │ detectar XMP    │
+              └────────┬────────┘
+                       │
+                       ▼
+              ┌─────────────────┐
+              │    VALIDACIÓN   │
+              │                 │
+              │ encontrado      │
+              │ faltante         │
+              │ duplicado        │
+              └────────┬────────┘
+                       │
+                       ▼
+              ┌─────────────────┐
+              │     ARCHIVOS    │
+              │                 │
+              │ copiar / mover  │
+              └─────────────────┘
+Esto nos permitirá crecer.
+________________________________________
+13. Funciones que dejaría previstas desde la versión 1
+Aunque no necesariamente las implementemos todas el primer día:
+Entrada
+•	Pegar nombres.
+•	Pegar números.
+•	Pegar tabla.
+•	.txt
+•	.csv
+•	.xlsx posteriormente.
+RAW
+Soporte inicial:
+CR3
+CR2
+NEF
+ARW
+RAF
+DNG
+ORF
+RW2
+PEF
+SRW
+RAW
+y que las extensiones estén en configuración, no enterradas dentro del código.
+XMP
+Detectar:
+nombre.xmp
+y:
+nombre.extensión.xmp
+Operaciones
+•	Verificar.
+•	Vista previa.
+•	Copiar.
+•	Mover.
+•	Cancelar.
+•	Evitar sobrescritura accidental.
+•	Detectar duplicados.
+Seguridad
+•	No mover si hay faltantes.
+•	Confirmación antes de mover.
+•	Mostrar destino.
+•	Registrar operación.
+•	Manejar archivos ya existentes.
+________________________________________
+14. Historial
+Más adelante:
+HISTORIAL
+────────────────────────────────
+
+28/09/2026
+LA FIESTA DE JUANA
+69 fotografías
+Mover
+
+21/09/2026
+BODA JUNIO 21
+80 fotografías
+Mover
+
+03/09/2026
+COMUNION CARLITOS
+32 fotografías
+Mover
+Y eventualmente:
+DESHACER ÚLTIMA OPERACIÓN
+Esto sí requiere diseñar desde el principio cómo registrar cada movimiento.
+________________________________________
+15. ¿Necesitamos base de datos?
+No inicialmente.
+No necesitamos MySQL, PostgreSQL, Oracle ni nada parecido.
+Para una aplicación local como esta podemos guardar configuración e historial en:
+JSON
+Por ejemplo:
+settings.json
+history.json
+Más adelante, si realmente lo necesita, podríamos pasar el historial a SQLite.
+Pero no quiero meter complejidad innecesaria.
+________________________________________
+16. ¿Necesitamos internet?
+No.
+Esta aplicación puede funcionar completamente offline.
+Eso es particularmente bueno para tu flujo:
+Fotos → disco local
+        ↓
+andercal.visuals — Selector
+        ↓
+Seleccionadas
+No necesitamos subir fotografías a ningún servidor.
+________________________________________
+17. ¿Necesitamos pagar para convertirlo en EXE?
+No.
+PyInstaller tiene precisamente el propósito de empaquetar aplicaciones Python y sus dependencias. Incluso permite crear una aplicación sin ventana de consola con --windowed y asignarle un icono. PyInstaller
+Al final podremos generar algo como:
+dist/
+└── andercal.visuals - Selector.exe
+________________________________________
+18. Una consideración importante sobre el .exe
+Yo no empezaría intentando crear inmediatamente el .exe.
+Primero:
+Python
+ ↓
+Aplicación funcionando
+ ↓
+Pruebas con tus fotos reales
+ ↓
+Correcciones
+ ↓
+Interfaz terminada
+ ↓
+PyInstaller
+ ↓
+.EXE
+Porque si hacemos el .exe desde el principio, cada pequeño cambio implica volver a empaquetar.
+________________________________________
+19. Plan de desarrollo
+Lo dividiría en 8 etapas.
+FASE 1 — Preparación
+Instalar:
+•	Python
+•	VS Code
+•	extensiones necesarias
+•	Git opcional
+•	entorno virtual
+Resultado:
+Python funcionando
+________________________________________
+FASE 2 — Motor de identificación
+Crear:
+parser.py
+Capaz de convertir:
+_MG_8009.jpg
+8009
+IMG_8009.CR3
+DSC_8009.NEF
+en:
+8009
+Esta fase es fundamental.
+________________________________________
+FASE 3 — Detector de fotografías
+Crear el escáner que encuentre:
+CR3
+CR2
+NEF
+ARW
+RAF
+DNG
+ORF
+RW2
+PEF
+SRW
+RAW
+y posteriormente añadir otros formatos si aparecen en tu flujo.
+________________________________________
+FASE 4 — Detector RAW + XMP
+Crear la relación:
+8009
+ │
+ ├── RAW → encontrado
+ └── XMP → encontrado
+incluyendo las dos convenciones posibles de XMP.
+________________________________________
+FASE 5 — Sistema de verificación
+Generar:
+69 solicitadas
+69 únicas
+69 RAW
+69 XMP
+0 faltantes
+y manejar:
+•	duplicados
+•	faltantes
+•	archivos ya existentes
+•	extensiones desconocidas
+•	nombres ambiguos
+________________________________________
+FASE 6 — Interfaz
+Construir:
+andercal.visuals — Selector
+con:
+•	Seleccionar carpeta.
+•	Área para pegar lista.
+•	Verificar.
+•	Resultados.
+•	Vista previa.
+•	Copiar.
+•	Mover.
+•	Cancelar.
+________________________________________
+FASE 7 — Seguridad y pruebas
+Aquí utilizaríamos copias de fotografías, no tu única copia original.
+Probaríamos casos como:
+✓ 1 RAW + 1 XMP
+✓ 69 RAW + 69 XMP
+✓ RAW faltante
+✓ XMP faltante
+✓ duplicado
+✓ archivo ya existente
+✓ CR3
+✓ CR2
+✓ NEF
+✓ ARW
+✓ DNG
+✓ nombres diferentes
+✓ lista con fechas y texto adicional
+________________________________________
+FASE 8 — EXE
+Finalmente:
+andercal.visuals - Selector.exe
+con:
+•	icono
+•	nombre
+•	versión
+•	ventana sin consola
+•	instalador opcional
+PyInstaller permite definir nombre, icono y modo sin consola durante el empaquetado. PyInstaller
+________________________________________
+20. Y tengo una recomendación adicional
+No haría que el programa busque solamente los últimos cuatro dígitos sin contexto.
+Por ejemplo:
+IMG_8009.CR3
+IMG_8009.NEF
+_MG_8009.CR3
+podrían coexistir en una misma carpeta.
+El programa debería detectar que los tres contienen 8009 y advertirte:
+Múltiples archivos corresponden al código 8009.
+Y permitirte ver:
+8009
+
+├── _MG_8009.CR3
+├── _MG_8009.xmp
+│
+└── IMG_8009.NEF
+Así evitamos que una coincidencia por número provoque un movimiento incorrecto.
+________________________________________
+21. El resultado final que visualizo
+Tu uso diario sería prácticamente:
+Abrir:
+andercal.visuals — Selector
+Seleccionar carpeta.
+Pegar:
+_MG_7644.jpg
+_MG_7647.jpg
+_MG_7654.jpg
+...
+VERIFICAR
+↓
+69 fotos
+69 RAW
+69 XMP
+0 faltantes
+
+✓ LISTO
+MOVER
+↓
+Seleccionadas\
+Y ya.
+Sin volver a pedirme que te genere un PowerShell con 69 números.
+________________________________________
+Lo mejor: podemos construirlo juntos desde cero
+Y como tú ya trabajas con VS Code y Windows, podemos hacerlo de manera muy guiada, igual que cuando hemos trabajado otros proyectos: primero dejamos funcionando una pieza, la probamos, y luego pasamos a la siguiente.
+Yo empezaría por la Fase 1 y dejaría preparada desde el principio la arquitectura para todas esas extensiones RAW y los dos formatos posibles de XMP. No necesitamos instalar nada de pago.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Perfecto. Con esas consideraciones, cambiaría ligeramente la arquitectura que te propuse. Y sí: tu idea de elegir qué extensiones mover es mejor que intentar inferir siempre “RAW + XMP”.
+Para andercal.visuals — Selector, lo diseñaría como una aplicación configurable, documentada y preparada para crecer.
+1. Stack definitivo que te recomiendo
+Trabajando en Antigravity, usaría:
+Tecnología	Función
+Python 3	Lenguaje principal
+CustomTkinter	Interfaz gráfica
+pathlib	Manejo de archivos/rutas
+JSON	Guardar configuración local
+pytest	Pruebas automatizadas
+Git + GitHub	Versionado
+PyInstaller	Crear .exe
+Markdown	Documentación
+¿Por qué CustomTkinter?
+Para este proyecto me parece mejor que Tkinter puro.
+Permite construir una interfaz mucho más moderna sin introducir la complejidad de un framework web.
+Podríamos tener algo visualmente parecido a:
+┌─────────────────────────────────────────────────────────┐
+│  andercal.visuals                                      │
+│  SELECTOR                                              │
+│                                           ● v1.0.0     │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  CARPETA DE TRABAJO                                    │
+│  ┌───────────────────────────────────────────────┐      │
+│  │ C:\...\LA FIESTA DE JUANA                     │      │
+│  └───────────────────────────────────────────────┘      │
+│                                      [ Seleccionar ]    │
+│                                                         │
+│  LISTA DE FOTOGRAFÍAS                                  │
+│  ┌───────────────────────────────────────────────┐      │
+│  │ _MG_7644.jpg                                 │      │
+│  │ _MG_7647.jpg                                 │      │
+│  │ _MG_7654.jpg                                 │      │
+│  │ ...                                           │      │
+│  └───────────────────────────────────────────────┘      │
+│                                                         │
+│  FORMATOS A PROCESAR                                   │
+│                                                         │
+│  ☑ CR3     ☐ CR2     ☐ NEF     ☐ ARW                   │
+│  ☐ RAF     ☐ DNG     ☑ XMP     ☐ ORF                   │
+│                                                         │
+│             [ VERIFICAR ARCHIVOS ]                     │
+│                                                         │
+├─────────────────────────────────────────────────────────┤
+│  RESULTADO                                              │
+│                                                         │
+│  ✓ 69 códigos encontrados                              │
+│  ✓ 69 CR3 encontrados                                  │
+│  ✓ 69 XMP encontrados                                  │
+│                                                         │
+│                   [ MOVER SELECCIONADAS ]              │
+└─────────────────────────────────────────────────────────┘
+Eso ya se sentiría como software, no como una interfaz de script.
+CustomTkinter está pensado precisamente para interfaces modernas basadas en Tkinter y permite temas, widgets modernos, modo claro/oscuro, escalado y personalización visual.
+________________________________________
+2. Tu idea de las extensiones cambia algo importante
+Estoy de acuerdo contigo.
+No deberíamos tener una regla rígida:
+"Cada foto seleccionada = RAW + XMP".
+La regla debería ser:
+"Para cada código seleccionado, mueve únicamente los tipos de archivo que el usuario haya seleccionado."
+Esto nos da mucha más flexibilidad.
+Por ejemplo:
+Caso normal
+☑ CR3
+☑ XMP
+Resultado:
+_MG_8009.CR3
+_MG_8009.xmp
+________________________________________
+Solo RAW
+☑ CR3
+☐ XMP
+Resultado:
+_MG_8009.CR3
+________________________________________
+Otro flujo
+☐ CR3
+☑ CR2
+☐ XMP
+Busca:
+_MG_8009.CR2
+________________________________________
+Incluso podríamos seleccionar varios
+☑ CR3
+☑ CR2
+☑ XMP
+El programa procesa cualquiera que exista.
+________________________________________
+3. Y aquí haría una distinción importante
+Hay dos conceptos diferentes:
+Extensiones disponibles
+Son todas las que la aplicación conoce:
+CR3
+CR2
+NEF
+ARW
+RAF
+DNG
+ORF
+RW2
+PEF
+SRW
+XMP
+Extensiones seleccionadas
+Son las que esta operación concreta debe procesar.
+Por ejemplo:
+CR3
+XMP
+La aplicación no tiene que decidir por ti.
+Tú decides.
+________________________________________
+4. Incluso podemos permitir extensiones personalizadas
+Más adelante:
+[ + Agregar extensión ]
+Y escribes:
+JPEG
+o:
+PSD
+o cualquier otra extensión que necesites.
+Así no tenemos que modificar el código cada vez que aparezca un nuevo formato en tu flujo.
+________________________________________
+5. La extracción del número también debe ser independiente
+Esto es importante arquitectónicamente.
+El programa no debería pensar:
+"MG significa que es una fotografía Canon."
+Debe pensar:
+"El usuario me proporcionó un identificador de fotografía. Necesito extraer el código."
+Por ejemplo:
+_MG_8009.jpg
+→ 8009
+IMG_8009.CR3
+→ 8009
+8009
+→ 8009
+foto_8009_seleccionada.jpg
+→ 8009
+Después usamos ese identificador para buscar los archivos según las extensiones seleccionadas.
+________________________________________
+6. La configuración de extensiones
+No las pondría directamente dentro del código principal.
+Tendríamos algo parecido a:
+config/
+└── formats.json
+Por ejemplo:
+{
+    "formats": [
+        "CR3",
+        "CR2",
+        "NEF",
+        "ARW",
+        "RAF",
+        "DNG",
+        "ORF",
+        "RW2",
+        "PEF",
+        "SRW",
+        "XMP"
+    ]
+}
+Así podremos modificar los formatos sin tocar la lógica principal.
+Y la aplicación puede recordar cuáles dejaste seleccionados.
+Por ejemplo, normalmente:
+☑ CR3
+☐ CR2
+☐ NEF
+☐ ARW
+☐ RAF
+☐ DNG
+☑ XMP
+La próxima vez que abras el programa, aparecen así.
+________________________________________
+7. Sobre recordar la última carpeta
+Sí.
+Pero no necesitamos historial.
+Son dos cosas diferentes.
+La aplicación simplemente guardará:
+{
+    "last_directory": "C:\\Users\\User\\Documents\\@andercal.visual\\FOTOGRAFIA\\LA FIESTA DE JUANA",
+    "selected_extensions": [
+        "CR3",
+        "XMP"
+    ]
+}
+Eso puede estar en:
+config/settings.json
+La próxima vez:
+Carpeta de origen
+
+C:\Users\User\Documents\@andercal.visual\FOTOGRAFIA\LA FIESTA DE JUANA
+y tus formatos:
+☑ CR3
+☑ XMP
+________________________________________
+8. Documentación: aquí sí te recomiendo hacerlo bien desde el principio
+Como quieres que esto sea un proyecto de desarrollo de software documentado, no me limitaría a un README.
+Haría un pequeño sistema documental.
+La estructura podría ser:
+andercal-visuals-selector/
+│
+├── README.md
+│
+├── docs/
+│   ├── requirements.md
+│   ├── functional-requirements.md
+│   ├── business-rules.md
+│   ├── architecture.md
+│   ├── data-model.md
+│   ├── user-guide.md
+│   ├── testing.md
+│   └── changelog.md
+│
+├── src/
+│   └── ...
+│
+├── tests/
+│   └── ...
+│
+├── config/
+│   └── ...
+│
+├── assets/
+│   └── ...
+│
+├── .gitignore
+├── requirements.txt
+└── LICENSE
+No necesariamente tenemos que escribirlos todos desde el primer día. Los iremos construyendo conforme desarrollamos.
+________________________________________
+9. ¿Qué debería documentarse?
+Sí: requisitos, funcionalidades y reglas de negocio.
+Pero cada uno tiene un propósito diferente.
+Requisitos
+Responden:
+¿Qué necesita hacer el sistema?
+Ejemplo:
+RF-001
+El sistema deberá permitir al usuario seleccionar una carpeta de origen.
+RF-002
+El sistema deberá permitir pegar una lista de nombres de archivos.
+RF-003
+El sistema deberá extraer identificadores numéricos de cuatro dígitos.
+________________________________________
+Reglas de negocio
+Responden:
+¿Qué reglas debe respetar el programa?
+Ejemplo:
+RN-001
+Una fotografía será identificada mediante un código numérico de cuatro dígitos.
+RN-002
+El sistema solo procesará las extensiones seleccionadas por el usuario.
+RN-003
+El sistema no deberá mover archivos si existen códigos solicitados que no pueden ser resueltos para las extensiones seleccionadas.
+Esta parte es especialmente importante para tu aplicación.
+________________________________________
+Funcionalidades
+Responden:
+¿Qué puede hacer el usuario?
+Ejemplo:
+F-01 Seleccionar carpeta
+F-02 Pegar lista
+F-03 Detectar códigos
+F-04 Seleccionar extensiones
+F-05 Verificar
+F-06 Mostrar faltantes
+F-07 Previsualizar operación
+F-08 Mover archivos
+F-09 Recordar última carpeta
+F-10 Recordar extensiones seleccionadas
+________________________________________
+10. También documentaría los casos de uso
+Por ejemplo:
+CU-01 — Seleccionar fotografías
+Actor: Usuario
+Entrada:
+_MG_8009.jpg
+_MG_8019.jpg
+_MG_8023.jpg
+Proceso:
+1.	Leer texto.
+2.	Detectar identificadores.
+3.	Eliminar duplicados.
+4.	Mostrar códigos encontrados.
+Resultado:
+8009
+8019
+8023
+________________________________________
+CU-02 — Mover fotografías
+Precondiciones:
+•	Existe carpeta de origen.
+•	Existen códigos válidos.
+•	Se seleccionaron extensiones.
+•	La verificación terminó.
+Resultado:
+Los archivos encontrados se mueven a:
+Seleccionadas\
+________________________________________
+11. También quiero que documentemos la arquitectura
+Por ejemplo:
+GUI
+ │
+ ▼
+Application Controller
+ │
+ ├──── Parser
+ │
+ ├──── Scanner
+ │
+ ├──── Validator
+ │
+ └──── File Manager
+             │
+             ▼
+        Sistema de archivos
+Esto te sirve muchísimo si dentro de dos años dices:
+"Quiero agregar una función para seleccionar también JPEG."
+No tienes que entender todo el programa nuevamente.
+________________________________________
+12. Git va a ser muy importante
+Yo sí utilizaría Git desde el primer día, antes de empezar a desarrollar.
+No solamente como copia de seguridad.
+Lo utilizaremos para:
+v0.1.0
+    ↓
+v0.2.0
+    ↓
+v0.3.0
+    ↓
+v1.0.0
+Y cada modificación importante tendrá un commit:
+feat: add RAW format detection
+feat: add extension selector
+feat: add folder persistence
+fix: prevent duplicate file moves
+fix: handle missing XMP files
+ui: improve verification panel
+Esto además te sirve como portafolio de desarrollo de software.
+________________________________________
+13. La documentación también puede evolucionar
+Por ejemplo:
+README.md
+sería la puerta de entrada:
+¿Qué es andercal.visuals — Selector?
+Después:
+docs/requirements.md
+¿Qué debe hacer?
+docs/business-rules.md
+¿Qué reglas debe respetar?
+docs/architecture.md
+¿Cómo está construido?
+docs/testing.md
+¿Cómo comprobamos que funciona?
+docs/changelog.md
+¿Qué cambió entre versiones?
+Eso es bastante más profesional que tener únicamente un README gigantesco.
+________________________________________
+14. Algo que añadiría: decisiones de arquitectura
+Crearíamos:
+docs/decisions/
+y podríamos guardar decisiones como:
+ADR-001-use-python.md
+ADR-002-use-customtkinter.md
+ADR-003-file-identification-by-four-digit-code.md
+ADR-004-configurable-file-extensions.md
+ADR-005-no-history.md
+Por ejemplo:
+ADR-004
+Decisión:
+Las extensiones a procesar serán seleccionables por el usuario.
+Motivo:
+El flujo habitual utiliza CR3 + XMP, pero otros proyectos pueden requerir CR2, NEF, ARW u otros formatos.
+Consecuencia:
+El motor de movimiento no debe estar acoplado a una extensión específica.
+Esto es precisamente el tipo de documentación que después te ayuda a entender por qué el software está diseñado de cierta manera.
+________________________________________
+15. Cómo quedaría nuestro concepto funcional
+Creo que ya podemos establecer una primera definición:
+andercal.visuals — Selector es una aplicación de escritorio para Windows destinada a localizar, verificar y trasladar archivos fotográficos asociados a una lista de identificadores, permitiendo al usuario seleccionar las extensiones que desea procesar y conservando la última carpeta utilizada y las preferencias de formatos.
+Y las reglas fundamentales serían:
+1. El usuario proporciona una lista de referencias.
+2. El sistema extrae los identificadores fotográficos.
+3. Los identificadores se normalizan y eliminan duplicados.
+4. El usuario selecciona las extensiones que desea procesar.
+5. El sistema busca únicamente esas extensiones.
+6. El sistema informa encontrados y faltantes.
+7. El sistema no ejecuta movimientos sin confirmación.
+8. Los archivos procesados se llevan a /Seleccionadas.
+9. El sistema recuerda la última carpeta utilizada.
+10. El sistema recuerda las extensiones seleccionadas.
+11. No se almacenará historial de operaciones en esta versión.
+Esto ya nos da una base real para el documento de requisitos.
+________________________________________
+16. Plan de desarrollo actualizado
+Yo lo organizaría así:
+Etapa 0 — Proyecto y documentación
+Git
+├── README
+├── requirements
+├── reglas de negocio
+└── arquitectura
+↓
+Etapa 1 — Núcleo
+Parser
+Scanner
+Matcher
+Validator
+File Manager
+↓
+Etapa 2 — Configuración
+Última carpeta
+Extensiones disponibles
+Extensiones seleccionadas
+↓
+Etapa 3 — Interfaz CustomTkinter
+Carpeta
+Lista
+Extensiones
+Verificación
+Resultados
+↓
+Etapa 4 — Operaciones
+Vista previa
+Copiar
+Mover
+Confirmación
+Seleccionadas
+↓
+Etapa 5 — Pruebas
+CR3
+CR2
+NEF
+ARW
+RAF
+DNG
+XMP
+faltantes
+duplicados
+errores
+↓
+Etapa 6 — Pulido visual
+Tema
+Iconos
+Espaciado
+Estados
+Mensajes
+Responsive/scaling
+↓
+Etapa 7 — Empaquetado
+PyInstaller
+       ↓
+andercal.visuals - Selector.exe
+↓
+Etapa 8 — Release 1.0
+v1.0.0
+README
+Manual
+CHANGELOG
+EXE
+Una última decisión que tomaría desde ya
+No haría que el programa "adivine" qué mover.
+La lógica sería explícita:
+Código + extensiones seleccionadas = archivos candidatos.
+Eso hace que sea mucho más seguro.
+Si tienes:
+8009
+y seleccionas:
+☑ CR3
+☑ XMP
+busca esos dos.
+Si seleccionas:
+☑ CR3
+solo mueve CR3.
+Si seleccionas:
+☑ NEF
+☑ XMP
+busca NEF + XMP.
+Es simple, predecible y fácil de documentar y probar.
+Con estas decisiones ya tenemos suficiente definición para comenzar el proyecto propiamente dicho en Antigravity, empezando por crear la estructura de Git + documentación + entorno Python, antes de escribir la primera función de la aplicación.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Sí. Y para este proyecto sí te recomiendo conectar Git con tu cuenta de GitHub. La idea clave es esta:
+Git = la herramienta que controla las versiones en tu computador.
+GitHub = el servicio donde puedes guardar remotamente ese repositorio Git, colaborar y tener respaldo.
+Git funciona localmente incluso sin internet; cada repositorio contiene el historial de cambios. GitHub es uno de los lugares donde puedes alojar ese repositorio remoto. GitHub Docs
+1. Una analogía sencilla
+Imagina nuestro proyecto:
+andercal.visuals - Selector
+En tu PC
+Tendremos:
+andercal.visuals-selector/
+y dentro habrá un repositorio Git.
+Git va registrando:
+Versión 1
+   ↓
+Agregamos detector CR3
+   ↓
+Versión 2
+   ↓
+Agregamos CustomTkinter
+   ↓
+Versión 3
+   ↓
+Agregamos XMP
+   ↓
+Versión 4
+Cada punto importante puede convertirse en un commit, que es básicamente una fotografía del estado del proyecto en ese momento. Git está diseñado para conservar ese historial y permitir recuperar versiones anteriores. GitHub Docs
+En GitHub
+Tendremos una copia remota:
+Git en tu PC
+     │
+     │ push
+     ▼
+GitHub
+Por ejemplo:
+github.com/tu_usuario/
+└── andercal-visuals-selector
+GitHub llama a esto un repositorio remoto. Normalmente Git lo identifica localmente con el nombre origin. GitHub Docs
+________________________________________
+2. Entonces, ¿GitHub ya no sirve para lo que venías haciendo?
+Sí sirve, pero probablemente hasta ahora lo estabas utilizando principalmente como almacenamiento/repositorio.
+La diferencia fundamental es:
+                 GIT                  GITHUB
+                 ───                  ───────
+Dónde             PC                   Internet
+Qué es            Software             Plataforma
+Historial         Sí                   Sí, recibe el historial
+Necesita internet No                   Para sincronizar
+Commits           Sí                   Sí
+Branches          Sí                   Sí
+Push              →                    recibe
+Pull              ←                    entrega
+GitHub depende de Git para el control de versiones del proyecto; GitHub añade la plataforma alrededor de ese repositorio. GitHub Docs
+________________________________________
+3. ¿Debemos vincular tu Git con GitHub?
+Sí.
+Para este proyecto tendremos:
+Antigravity
+     │
+     ▼
+Carpeta del proyecto
+     │
+     ▼
+    GIT
+     │
+     │ push
+     ▼
+   GITHUB
+Y tu flujo normal será:
+1. Trabajas en Antigravity
+        ↓
+2. Modificas código
+        ↓
+3. Git registra los cambios
+        ↓
+4. Haces commit
+        ↓
+5. Push
+        ↓
+6. GitHub queda actualizado
+Y si algún día trabajas desde otro computador:
+GitHub
+   ↓
+git clone
+   ↓
+nuevo computador
+git clone crea una copia local del repositorio incluyendo archivos, historial y ramas. GitHub Docs
+________________________________________
+4. ¿GitHub Desktop o Git por terminal?
+Aquí hay una decisión importante.
+Tienes dos caminos:
+Opción A — GitHub Desktop
+Interfaz gráfica:
+Cambios
+✓ archivo1.py
+✓ README.md
+
+[Commit]
+
+[Push origin]
+Es más fácil al principio.
+Opción B — Git directamente
+Desde terminal:
+git add .
+git commit -m "feat: add RAW detection"
+git push
+Para ti recomiendo aprender Git directamente, aunque al principio te vaya guiando paso a paso.
+¿Por qué?
+Porque estás estudiando Ingeniería de Sistemas y este proyecto es una oportunidad muy buena para aprender realmente:
+git status
+git add
+git commit
+git push
+git pull
+git branch
+git switch
+git log
+No necesitas aprender 50 comandos. Con unos pocos puedes trabajar perfectamente.
+GitHub también documenta el uso de Git desde línea de comandos y estos comandos básicos. GitHub Docs
+________________________________________
+5. ¿Y Antigravity?
+Aquí está nuestro ecosistema:
+                    ┌─────────────────────┐
+                    │       GITHUB        │
+                    │                     │
+                    │ Repositorio remoto  │
+                    └──────────┬──────────┘
+                               │
+                         push / pull
+                               │
+                               ▼
+┌─────────────────────────────────────────────────┐
+│                  TU COMPUTADOR                  │
+│                                                 │
+│  ┌──────────────┐      ┌──────────────────┐    │
+│  │  Antigravity │ ───► │       Git        │    │
+│  │              │      │                  │    │
+│  │ escribir     │      │ versiones        │    │
+│  │ código       │      │ commits          │    │
+│  └──────────────┘      │ ramas            │    │
+│                        └──────────────────┘    │
+│                                  │              │
+│                                  ▼              │
+│                        Proyecto local           │
+└─────────────────────────────────────────────────┘
+Antigravity será tu entorno de desarrollo.
+Git será el control de versiones.
+GitHub será el repositorio remoto.
+________________________________________
+6. Lo que vamos a hacer ahora
+No empezaría todavía a programar Selector.
+Primero vamos a preparar correctamente el entorno.
+Paso 1
+Instalar Git.
+Paso 2
+Configurar tu identidad de Git.
+Por ejemplo:
+git config --global user.name "Tu Nombre"
+git config --global user.email "tu-correo@..."
+Esto identifica quién realiza los commits.
+Paso 3
+Comprobar que Git funciona:
+git --version
+Paso 4
+Crear el repositorio de GitHub.
+Yo lo llamaría algo como:
+andercal-visuals-selector
+Me parece mejor que poner espacios, -exe, software, etc.
+El nombre del proyecto visible puede seguir siendo:
+andercal.visuals — Selector
+pero el repositorio:
+andercal-visuals-selector
+________________________________________
+7. Una cosa importante al crear el repositorio
+Cuando creemos el repositorio vacío en GitHub, no vamos a inicializarlo con README, .gitignore ni License desde GitHub.
+Vamos a crear esos archivos localmente dentro de nuestro proyecto.
+La propia documentación de GitHub contempla este flujo para publicar un proyecto local nuevo: inicializar Git, hacer el primer commit, asociar el remoto y hacer push. GitHub Docs
+Así tendremos control completo desde el principio.
+________________________________________
+8. Después conectaremos ambos
+Una vez creado el repositorio:
+git remote add origin https://github.com/TU_USUARIO/andercal-visuals-selector.git
+Y podremos comprobarlo con:
+git remote -v
+GitHub documenta precisamente git remote add origin ... para asociar un repositorio local con un remoto. GitHub Docs
+Después:
+git push -u origin main
+Y nuestro proyecto estará en GitHub.
+________________________________________
+9. ¿HTTPS o SSH?
+Para comenzar, HTTPS.
+Tenemos:
+https://github.com/...
+en lugar de:
+git@github.com:...
+GitHub soporta ambos métodos. SSH requiere configurar una clave SSH; HTTPS es más sencillo para nuestro primer proyecto. GitHub Docs
+Además, Git puede utilizar un administrador de credenciales para no pedirte autenticación constantemente. GitHub Docs
+Más adelante, si quieres aprender SSH, lo hacemos.
+________________________________________
+10. ¿Qué vamos a tener al terminar esta primera etapa?
+Algo así:
+TU COMPUTADOR
+│
+└── andercal-visuals-selector
+    │
+    ├── .git/
+    ├── README.md
+    ├── docs/
+    ├── src/
+    ├── tests/
+    └── ...
+          │
+          │ git push
+          ▼
+       GITHUB
+          │
+          └── andercal-visuals-selector
+Y a partir de ahí cada etapa de desarrollo que hagamos tendrá su correspondiente commit.
+Eso además hará que nuestro desarrollo sea mucho más ordenado: no solo construiremos el programa, sino que iremos construyendo un proyecto de software documentado y versionado.
+________________________________________
+Empecemos por instalar Git
+Como estás en Windows, primero quiero que hagamos solo esta parte, sin adelantarnos.
+Descarga Git for Windows desde su sitio oficial:
+Git for Windows — sitio oficial
+Instálalo con las opciones predeterminadas.
+Cuando termine, abre PowerShell o la terminal de Antigravity y ejecuta:
+git --version
+Deberías obtener algo parecido a:
+git version 2.x.x
+

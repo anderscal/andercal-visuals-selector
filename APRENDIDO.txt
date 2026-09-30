@@ -1,0 +1,72 @@
+======================================================================
+               BITÁCORA DE APRENDIZAJE Y DECISIONES TÉCNICAS
+             PROYECTO: andercal.visuals — Selector (v1.0.0)
+======================================================================
+
+----------------------------------------------------------------------
+[FASE 0] CIMIENTOS, ENTORNO Y CONTROL DE VERSIONES
+----------------------------------------------------------------------
+
+1. CONTROL DE VERSIONES (GIT vs GITHUB):
+   • Git:
+     - Es un software local que vive en tu máquina.
+     - Funciona 100% offline.
+     - Su misión: registrar la historia del código a través de "snapshots" (fotos del estado del proyecto) llamados COMMITS.
+   • GitHub:
+     - Es una plataforma en la nube (remota).
+     - Su misión: alojar copias de repositorios Git para respaldo, colaboración y portafolio profesional.
+   • Flujo de trabajo esencial:
+     - Código modificado -> git status (ver qué cambió)
+     - git add . (preparar cambios en "staging")
+     - git commit -m "mensaje" (guardar cambio en el historial local)
+     - git push origin main (subir cambios a GitHub)
+
+2. COMANDOS BÁSICOS DE VERIFICACIÓN (Terminal / PowerShell):
+   • git --version
+     Verifica que Git esté instalado en el PATH del sistema.
+   • python --version
+     Verifica la versión instalada del intérprete de Python (recomendado 3.10 o superior).
+
+3. IDENTIDAD EN GIT (FIRMA DEL AUTOR):
+   • ¿Por qué es necesario?
+     Cada "commit" en Git es una firma indeleble que requiere:
+     - Nombre de autor (user.name)
+     - Correo electrónico (user.email)
+   • Relación con GitHub:
+     Si el correo coincide con el registrado en tu cuenta de GitHub, los commits se vincularán automáticamente a tu perfil y foto.
+   • Comandos de consulta:
+     git config --global user.name
+     git config --global user.email
+     git config --global --list
+   • Configurado actualmente:
+     user.name = anderscal
+     user.email = calderonanderson78@gmail.com
+
+4. INICIALIZACIÓN DE UN REPOSITORIO (GIT INIT):
+   • git init:
+     Crea una carpeta oculta '.git/' que convierte la carpeta en un repositorio bajo control de versiones.
+   • git branch -M main:
+     Renombra la rama por defecto a 'main', alineándose con el estándar actual de la industria y de GitHub.
+
+5. EL ARCHIVO .gitignore:
+   • Propósito:
+     Evita que archivos basura, temporales, cachés compiladas (__pycache__/) o entornos virtuales (.venv/) se registren en el historial o se suban a la nube.
+   • Regla de oro:
+     Solo versionamos código fuente, assets necesarios y documentación. Nunca cachés ni temporales del sistema operativo.
+
+6. EL ÁREA DE PREPARACIÓN (STAGING AREA) Y PRIMER COMMIT:
+   • git status:
+     Muestra qué archivos se han modificado, creado o eliminado.
+   • git add . (o git add <archivo>):
+     Mueve los archivos al "Staging Area" (el sobre cerrado antes de enviar la carta).
+   • git commit -m "mensaje":
+     Toma una fotografía del estado actual de los archivos en Staging y la guarda en el historial permanente.
+   • Convención de mensajes de commit (Conventional Commits):
+     - feat: nueva funcionalidad o estructura
+     - fix: corrección de errores
+     - docs: cambios en documentación
+
+======================================================================
+
+
+

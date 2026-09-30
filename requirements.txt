@@ -1,0 +1,9 @@
+# GUI Framework
+customtkinter>=5.2.0
+pillow>=10.0.0
+
+# Pruebas automatizadas
+pytest>=7.4.0
+
+# Empaquetado a ejecutable (.EXE)
+pyinstaller>=6.0.0
