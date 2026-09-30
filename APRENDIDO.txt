@@ -178,8 +178,12 @@
 
    • Centrado Dinámico de Ventanas:
      - Cálculo de dimensiones de pantalla mediante winfo_screenwidth() y winfo_screenheight() para posicionar la ventana perfectamente centrada (+x+y) en monitores de cualquier resolución.
+   • Flexibilidad de Procesamiento Parcial con Advertencia (UX Mejora de Campo):
+     - Situación: Si el usuario selecciona extensiones opcionales (ej: ACR o XMP que no aplican a todas las fotos), la aplicación no debe bloquear la operación.
+     - Solución: El botón '⚠️ VISTA PREVIA Y PROCESAR (N ARCHIVOS ENCONTRADOS)' se habilita en color naranja si hay archivos encontrados (can_process = True), permitiendo al usuario revisar el modal con la advertencia explícita y proceder según su criterio.
 
 ======================================================================
+
 
 
 

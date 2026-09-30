@@ -43,7 +43,9 @@ def test_validator_detects_missing_xmp():
 
         report = validate_photo_selection(folder, "_MG_7644.jpg", ["CR3", "XMP"])
         assert report["is_valid_for_operation"] is False
+        assert report["can_process"] is True  # Aunque falta XMP, aún se puede procesar el RAW si el usuario lo confirma
         assert report["missing_details"] == {"7644": ["XMP"]}
+
 
 
 def test_full_pipeline_end_to_end():

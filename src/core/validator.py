@@ -1,7 +1,7 @@
 """
 src/core/validator.py
 Módulo encargado de validar la integridad de la selección, detectar archivos faltantes,
-ambigüedades (colisiones de nombres) y determinar si la operación es segura.
+ambigüedades (colisiones de nombres) y estructurar el reporte para decisión del usuario.
 """
 
 from pathlib import Path
@@ -20,19 +20,8 @@ def validate_photo_selection(
 
     :param directory_path: Carpeta de trabajo.
     :param raw_text: Texto con los nombres o códigos pegados.
-    :param selected_extensions: Extensiones activas (ej: ['CR3', 'XMP']).
-    :return: Diccionario detallado de diagnóstico:
-             {
-               'unique_codes': ['7644', '8009'],
-               'total_codes': 2,
-               'selected_extensions': ['CR3', 'XMP'],
-               'found_counts': {'CR3': 2, 'XMP': 1},
-               'missing_counts': {'CR3': 0, 'XMP': 1},
-               'missing_details': {'8009': ['XMP']},
-               'ambiguous_details': {},
-               'files_to_process': [Path('_MG_7644.CR3'), Path('_MG_7644.xmp'), Path('IMG_8009.CR3')],
-               'is_valid_for_operation': False
-             }
+    :param selected_extensions: Extensiones activas (ej: ['CR3', 'XMP', 'ACR']).
+    :return: Diccionario detallado de diagnóstico.
     """
     unique_codes = extract_photo_codes(raw_text)
     norm_exts = [ext.strip().lstrip(".").upper() for ext in selected_extensions]
@@ -47,7 +36,10 @@ def validate_photo_selection(
             "missing_details": {},
             "ambiguous_details": {},
             "files_to_process": [],
+            "has_missing": False,
+            "has_ambiguous": False,
             "is_valid_for_operation": False,
+            "can_process": False
         }
 
     matches = find_matches_for_codes(directory_path, unique_codes, norm_exts)
@@ -80,8 +72,14 @@ def validate_photo_selection(
                     ambiguous_details[code] = {}
                 ambiguous_details[code][ext] = found_paths
 
-    # La operación es válida si NO hay archivos faltantes ni ambigüedades
-    is_valid = (len(missing_details) == 0) and (len(ambiguous_details) == 0)
+    has_missing = len(missing_details) > 0
+    has_ambiguous = len(ambiguous_details) > 0
+
+    # is_valid_for_operation: True si está 100% perfecto sin faltantes
+    is_perfect = (not has_missing) and (not has_ambiguous)
+
+    # can_process: True si hay al menos un archivo encontrado para procesar
+    can_process = len(files_to_process) > 0
 
     return {
         "unique_codes": unique_codes,
@@ -92,5 +90,8 @@ def validate_photo_selection(
         "missing_details": missing_details,
         "ambiguous_details": ambiguous_details,
         "files_to_process": files_to_process,
-        "is_valid_for_operation": is_valid,
+        "has_missing": has_missing,
+        "has_ambiguous": has_ambiguous,
+        "is_valid_for_operation": is_perfect,
+        "can_process": can_process
     }

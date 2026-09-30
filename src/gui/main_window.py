@@ -366,30 +366,48 @@ class MainWindow(ctk.CTk):
 
         self._update_diag_textbox("\n".join(diag_lines))
 
-        # Habilitar botón si es válido
-        if report['is_valid_for_operation']:
-            self.btn_execute.configure(state="normal", fg_color="#2e7d32")
+        # Actualizar botón de vista previa según can_process
+        if report.get('can_process', False):
+            count_files = len(report.get('files_to_process', []))
+            if report.get('has_missing'):
+                self.btn_execute.configure(
+                    state="normal",
+                    text=f"⚠️ VISTA PREVIA Y PROCESAR ({count_files} ARCHIVOS ENCONTRADOS)",
+                    fg_color="#f57c00",
+                    hover_color="#e65100"
+                )
+            else:
+                self.btn_execute.configure(
+                    state="normal",
+                    text=f"🚀 VISTA PREVIA Y PROCESAR ({count_files} ARCHIVOS ENCONTRADOS)",
+                    fg_color="#2e7d32",
+                    hover_color="#1b5e20"
+                )
         else:
-            self.btn_execute.configure(state="disabled", fg_color="#555555")
+            self.btn_execute.configure(
+                state="disabled",
+                text="🚀 VISTA PREVIA Y PROCESAR",
+                fg_color="#555555"
+            )
 
     def _on_show_preview(self):
         """Abre la ventana modal de vista previa."""
-        if not self.last_validation_report or not self.last_validation_report.get("is_valid_for_operation"):
+        if not self.last_validation_report or not self.last_validation_report.get("can_process"):
             return
 
         folder_path = self.folder_entry.get().strip()
         dest_dir = str(Path(folder_path) / "Seleccionadas")
         action = self.action_var.get()
-        files = self.last_validation_report.get("files_to_process", [])
 
         PreviewDialog(
             parent=self,
             source_dir=folder_path,
             dest_dir=dest_dir,
             action=action,
-            files_to_process=files,
+            validation_report=self.last_validation_report,
             on_confirm_callback=self._execute_process
         )
+
 
     def _execute_process(self):
         """Ejecuta la copia o movimiento final tras la confirmación en el modal."""

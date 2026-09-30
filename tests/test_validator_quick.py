@@ -31,10 +31,12 @@ def run_validator_tests():
 
         # Escenario 1: Falta XMP de 8009
         report_1 = validate_photo_selection(folder, raw_text_1, exts_1)
-        print(f"\nEscenario 1 (Falta XMP de 8009):\n  Válido para operar: {report_1['is_valid_for_operation']}")
+        print(f"\nEscenario 1 (Falta XMP de 8009):\n  Válido 100% perfecto: {report_1['is_valid_for_operation']}\n  Procesable por el usuario: {report_1['can_process']}")
         print(f"  Faltantes: {report_1['missing_details']}")
-        assert report_1["is_valid_for_operation"] is False, "Debe ser falso si falta un XMP"
+        assert report_1["is_valid_for_operation"] is False
+        assert report_1["can_process"] is True
         assert report_1["missing_details"] == {"8009": ["XMP"]}, "Detalle de faltantes incorrecto"
+
 
         # Crear XMP faltante para Escenario 2 (Todo completo)
         (folder / "IMG_8009.xmp").write_text("dummy")
