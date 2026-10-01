@@ -183,6 +183,37 @@
      - Solución: El botón '⚠️ VISTA PREVIA Y PROCESAR (N ARCHIVOS ENCONTRADOS)' se habilita en color naranja si hay archivos encontrados (can_process = True), permitiendo al usuario revisar el modal con la advertencia explícita y proceder según su criterio.
 
 ======================================================================
+[FASE 6] EMPAQUETADO A EJECUTABLE DE WINDOWS (.EXE)
+======================================================================
+
+1. EMPAQUETADO CON PYINSTALLER:
+   • ¿Qué hace PyInstaller?
+     Analiza el código Python, identifica todas sus dependencias (CustomTkinter, Pillow, etc.) y compila la aplicación en una estructura de ejecutable autónomo.
+   • Modos de ejecución:
+     - --noconsole (o --windowed): Oculta la consola negra de comandos para que la aplicación abra únicamente su interfaz de usuario.
+     - --clean: Limpia cachés temporales previas de empaquetado antes de generar el nuevo build.
+   • Carpetas generadas:
+     - build/: Archivos temporales de análisis de compilación (excluidos por .gitignore).
+     - dist/: Ubicación donde se almacena la carpeta ejecutable lista para distribuir ('dist/andercal.visuals - Selector/').
+
+======================================================================
+[FASE 7] CIERRE, DOCUMENTACIÓN FINAL Y RELEASE RELEASE (v1.0.0)
+======================================================================
+
+1. GESTIÓN DE VERSIONES SEMÁNTICAS Y ETIQUETAS GIT:
+   • Versionado Semántico (SemVer: MAJOR.MINOR.PATCH):
+     - v1.0.0: Primera versión principal estable y probada en producción.
+   • Etiquetas de Git (Git Tags):
+     - git tag -a v1.0.0 -m "Release v1.0.0": Crea una marca permanente e inmutable en la historia del repositorio.
+     - git push origin v1.0.0: Publica la etiqueta formalmente en GitHub para generar la Release de descarga.
+   • Registro de Cambios (docs/changelog.md):
+     - Documenta de forma estructurada las características agregadas (Added), correcciones (Fixed) y mejoras de cada release.
+
+======================================================================
+                         ¡PROYECTO CULMINADO!
+======================================================================
+
+
 
 
 
